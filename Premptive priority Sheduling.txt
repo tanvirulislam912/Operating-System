@@ -1,0 +1,126 @@
+#include <stdio.h>
+void calculateWT(int n, int BT[], int priority[], int WT[], int process[]);
+void calculateTAT(int n, int BT[], int WT[], int TAT[]);
+void calculateAT(int n, int BT[], int priority[]);
+
+int main()
+{
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    int t = 0;
+    int current_process;
+    int prior_process;
+    int highest_priority;
+    int remaining_BT = 0;
+
+
+    int WT[n], process[n], TAT[n] , priority[n], BT[n];
+    int  AT[n];
+    printf("Enter the arrival time for each process: ");
+     for (int i = 0; i < n; i++)
+     {
+        printf("Process %d : ", i + 1);
+        scanf("%d", &AT[i]);
+    }
+
+    printf("Enter the burst time and priority for each process:\n");
+    for (int i = 0; i < n; i++)
+    {
+        printf("Process %d : ", i + 1);
+        scanf("%d%d", &BT[i], &priority[i]);
+    }
+
+    calculateAT(n, BT, priority);
+
+    while (remaining_BT > 0)
+    {
+        int highest_priority = 0;
+        for (int i = 0; i < n; i++)
+        {
+            if (BT[i] > 0 && priority[i] > highest_priority)
+            {
+                highest_priority = priority[i];
+                current_process = i;
+            }
+        }
+
+        if (highest_priority != 0)
+        {
+            WT[current_process] = t - AT[current_process];
+            BT[current_process]--;
+            remaining_BT--;
+            t++;
+
+            if (BT[current_process] == 0)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    if (priority[i] > priority[current_process])
+                    {
+                        highest_priority = priority[i];
+                        current_process = i;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+void calculateWT(int n, int BT[], int priority[], int WT[], int process[])
+{
+    for (int i = 0; i < n; i++)
+    {
+        WT[i] = 0;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if (BT[i] > 0)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (BT[j] > 0 && priority[j] > priority[i])
+                {
+                    WT[i] = WT[i] + BT[i];
+                }
+            }
+        }
+    }
+}
+
+void calculateTAT(int n, int BT[], int WT[], int TAT[])
+{
+    for (int i = 0; i < n; i++)
+    {
+        TAT[i] = BT[i] + WT[i];
+    }
+}
+
+void calculateAT(int n, int BT[], int priority[])
+{
+    int process[n], WT[n], TAT[n], TWT = 0, TTAT = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        process[i] = i + 1;
+    }
+
+    calculateWT(n, BT, priority, WT, process);
+    calculateTAT(n, BT, WT, TAT);
+
+    printf("Process\t Burst Time\t Priority\t Waiting Time\t Turnaround Time\n");
+
+    for (int i = 0; i < n; i++)
+    {
+        TWT = TWT + WT[i];
+        TTAT = TTAT + TAT[i];
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", process[i], BT[i], priority[i], WT[i], TAT[i]);
+    }
+
+    printf("\nAverage waiting time: %.2f", (float)TWT / n);
+    printf("\nAverage turnaround time: %.2f", (float)TTAT / n);
+}
+
